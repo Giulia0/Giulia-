@@ -1,1 +1,1 @@
-Problem and solution on a Linear Programming
+Assignment on a Linear Programming problem
