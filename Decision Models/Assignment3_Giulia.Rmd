@@ -1,0 +1,110 @@
+---
+title: "Assignment 3"
+author: "Giulia Mura, matricola: 860910"
+date: "21/05/2020"
+output:
+  prettydoc::html_pretty:
+    df_print: paged
+    toc: yes
+    toc_depth: 5
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '5'
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(NLRoot)
+library(GenSA)
+```
+
+## Problem 1.
+Using the bisection method calculate at least one zero for $f(x)=-x^3+4x^2-2$ starting for a suitable initial guess. You may want to reuse the code provided in the exercise session.
+
+```{r}
+func <- function(x) {
+  -x^3 + 4 * x^2 -2
+}
+
+curve(func, xlim = c(-3,5), col='blue', lwd=1.5, lty=2)
+abline(h=0)
+abline(v=0)
+```
+
+We will use the interval [-1,4]. We use the bisection method BFfzero().
+
+```{r}
+BFfzero(func, -1, 4)
+```
+
+The output of the function shows the following roots: $x_1$ = -0.6554451; $x_2$ = 0.7892418; $x_3$ = 3.866199.
+
+## Problem 2.  
+#### 1. Apply an iteration of the gradient method by performing the line search in an exact way, starting from the point $A=(-1,4)^T$. Report all the steps of the method, not just the result.
+
+*Step 0*. We want to minimize the following problem: $$f(x_1,x_2)=2x_1^2+x_1x_2+2(x_2 -3)^2$$  
+*Step 1*. So we calculate $$\nabla{f(x)}=\left[{4x_1+x_2,x_1+4(x_2-3)}\right]$$  
+*Step 2*. Let's pick $x_0$ that corrispond to our A: $$x_0=A=\left[{-1,4}\right]^T$$  
+so then: $$\nabla{f(x_0)}=\left[{4(-1)+4,-1+4(4-3)}\right]=\left[{0,3}\right]$$  
+*Step 3*. Let's check to see if the stop criteria is statisfied, assuming that $\varepsilon=0.1$. $$\left||{\nabla{f(x_0)}}\right||<\varepsilon$$ $$\left||{\nabla{f(x_0)}}\right||=\sqrt{0+9}=3>\varepsilon$$  
+
+The stop criteria is not satisfied, then find next point.  
+
+*Step 4*: $$d_0=-\nabla{f(x_0)}=-\left[{0,3}\right]$$
+$$x_1=\left[{-1,4}\right]+\alpha_0\left[{0,-3}\right]=\left[{-1,4-3\alpha_0}\right]$$
+$$f(-1,4-3\alpha_0)=18\alpha_0^2-9\alpha_0$$
+$$f'(-1,4-3\alpha_0)=36\alpha_0-9$$
+$$\alpha_0=1/4$$
+$$x_1=\left[{-1,13/4}\right]$$
+So then: $$\nabla{f(x_1)}=\left[{4(-1)+13/4,-1+4(13/4-3)}\right]=\left[{-3/4,0}\right]$$  
+*Step 5*. Let's check to see if the stop criteria is now statisfied, always assuming that $\varepsilon=0.1$. $$\left||{\nabla{f(x_1)}}\right||<\varepsilon$$ $$\left||{\nabla{f(x_1)}}\right||=\sqrt{9/16+0}=0.75>\varepsilon$$  
+
+The stop criteria is not statisfied. This means that we should try with more iteration until the stop criteria is satisfied.
+
+#### 2. Apply an iteration of Newton’s method from point A. Verify that the point found is the minimum of function $f$. Report all the steps of the method, not just the result.  
+
+
+*Step 0*. We want to minimize the same previous problem: $$f(x_1,x_2)=2x_1^2+x_1x_2+2(x_2 -3)^2$$  
+*Step 1*. So we calculate $$\nabla{f(x)}=\left[{4x_1+x_2,x_1+4(x_2-3)}\right]$$  
+*Step 2*. The Hessian matrix is: $$H(x_k)=\begin{bmatrix}4 & 1\\ 1 & 4 \end{bmatrix}$$  
+and we need the inverse of the Hessian matrix: $$H(x_k)^{-1}=\begin{bmatrix}4/15 & -1/15\\ -1/15 & 4/15 \end{bmatrix}$$  
+*Step 3*. Let's pick $x_0$ that corrispond to our A: $$x_0=A=\left[{-1,4}\right]^T$$  
+then we calculate the gradient: $$\nabla{f(x_0)}=\left[{4(-1)+4,-1+4(4-3)}\right]=\left[{0,3}\right]$$  
+*Step 4*. We calculate the new **x**: $x_1=x_0-H(x_0)^{-1}\nabla{f(x_0)}$  
+$$x_1=\begin{bmatrix}-1 \\ 4\end{bmatrix}-\begin{bmatrix}4/15 & -1/15\\ -1/15 & 4/15 \end{bmatrix}*\begin{bmatrix}0 \\ 3\end{bmatrix}=\begin{bmatrix}-0.8 \\ 3.2\end{bmatrix}$$  
+*Step 5*. We calculate the gradient $$\nabla{f(x_1)}=\left[{4(-0.8)+3.2,-0.8+4(3.2-3)}\right]=\left[{0,0}\right]$$  
+
+Since the gradient is zero, the method has converged.  
+
+#### 3. How many iterations of Newton’s method are required to optimize a quadratic function?  
+Newton's method uses the $2^{nd}$ derivative so to optimize a quadratic function it can find the optimum point in one iteration.
+
+## Problem 3.  
+Use the Simulated annealing algorithm to find the global minimum of the following function.  
+$$f(x)=34e^{-\frac{1}{2}\left({\frac{x-88}{2}}\right)^2}+\left({\frac{x}{10}-2sin\left({\frac{x}{10}}\right)}\right)^2$$ 
+
+Notiche that $f(x)$ may have several local optima, thus restarting and a careful selection of the algorithm parameters may be necessary.  
+
+```{r}
+func1 <- function(x) {
+  34*(exp(1))^(-0.5*((x-88)/2)^2)+((x/10)-2*sin(x/10))^2
+}
+curve(func1, xlim=c(-350,350), col='red', lwd=1.5, lty=2)
+```
+
+It seems the function has the minimum very close to 0 so we will set the interval [-100,100], then we will use the GenSA package using that interval.
+
+```{r}
+res <- GenSA(fn = func1, lower = c(-100), upper = c(100))
+final_par <- res$par
+final_res <- res$value
+print(paste0("The global minimum of the function is equal to: ",final_par))
+print(paste0("The value of the function in that point is equal to: ",final_res)) 
+```
