@@ -1,0 +1,149 @@
+---
+title: "Assignment 4"
+author: "Giulia Mura; matricola: 860910"
+date: "04/06/2020"
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: 5
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '5'
+  prettydoc::html_pretty:
+    df_print: paged
+    toc: yes
+    toc_depth: 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+## Introduction.
+DM Systems has agreed to supply 500,000 Voip Phones to DISCO Stores in 90 days at fixed price. A key component in the phones is a programmable array logic integrated circuit chip (“PAL chip”), one of which is required in each phone.
+
+DM Systems has bought these chips in the past from an Italian chip manufacturer, IM Chips. However, DM Systems has been approached by a Korean manufacturer, KR Electronics, which is offering a lower price on the chips. This offer is open for only 10 days, and DM Systems must decide whether to buy some or all of the PAL chips from KR. Any chips that DM does not buy from KR will be bought from IM. IM Chips will sell PAL chips to DM for ${\$3.00}$ per chip in any quantity. KR will accept orders only in multiples of 250,000 PAL chips, and is offering to sell the chips for ${\$2.00}$ per chip for 250,000 chips, and for ${\$1.50}$ per chip in quantities of 500,000 or more chips.  
+
+## The dumping charge.
+The situation is complicated by a dumping charge that has been filed by IM Chips against KR. If this charge is upheld by the Italian government, then the KR chips will be subject to an antidumping tax. This case will not be resolved until after the point in time when DM must make the purchase decision. If DM buys the KR chips, these will not be shipped until after the antidumping tax would go into effect and the chips would be subject to the tax. Under the terms offered by KR, DM would have to pay any antidumping tax that is imposed. DM believes there is a 60% chance the antidumping tax will be imposed. If it is imposed, then it is equally likely that the tax will be 50%, 100%, or 200% of the sale price for each PAL chip.  
+
+## The decision tree.
+
+```{r pressure, echo=TRUE, fig.cap="Decision Tree", out.width = '100%'}
+knitr::include_graphics("/Users/giulia/Unimib/Decision Models/Assignment 4 - Decision Tree/DT.png")
+```
+
+Nel Decision Tree viene esposto graficamente il problema inizialmente proposto. Nel primo ramo si ha l'alternativa in cui l'ordine viene effettuato interamente presso l'azienda coreana, con i sottorami che indicano i costi che si andrebbero a sostenere nel caso in cui non venisse applicata la tassazione e nel caso in cui venisse applicata, situazione la quale prevede tassazioni del 50%, 100% o 200%.  
+Nel secondo ramo invece si presenta l'alternativa in cui l'ordine viene effettuato per metà presso l'azienda coreana e per metà presso l'azienda italiana e anch'esso rappresenta nei suoi sottorami i casi di tassazione e non.  
+Come ultimo ramo si ha invece l'alternativa in cui l'ordine viene interamente effettuato presso l'azienda italiana, alternativa la quale non prevede alcuna tassazione.
+
+## Expected Value.
+Using expected value as the decision criterion, determine DM’s preferred ordering alternative for the PAL chips.
+
+### Soluzione.
+
+```{r echo=TRUE, fig.cap="Decision Tree con EV", out.width = '100%'}
+knitr::include_graphics("/Users/giulia/Unimib/Decision Models/Assignment 4 - Decision Tree/DTconEV.png")
+```
+
+Nel Decision Tree sopra illustrato sono stati indicati i vari Expected Values al fianco di ogni cosiddetto "Chance Node". Si riportano di seguito i calcoli effettuati per ottenere tali valori.  
+$EV1=(1.125.000*\frac{1}{3})+(1.500.000*\frac{1}{3})+(2.250.000*\frac{1}{3})=1.625.000$  
+$EV2=(750.000*0,4)+(1.625.000*0,6)=1.275.000$  
+$EV3=(1.500.000*\frac{1}{3})+(1.750.000*\frac{1}{3})+(2.250.000*\frac{1}{3})=1.833.000$  
+$EV4=(1.250.000*0,4)+(1.833.000*0,6)=1.600.000$  
+
+> In conclusione, all'interno del Root Node è stato riportato l'*expected value* più basso dato il tipo di problema basato sui costi. Infatti, la migliore alternativa sarà quella di effettuare l'acquisto interamente presso il produttore coreano, alternativa la quale risulta avere l'Expected Value più basso pari a *EV=1.275.000*.
+
+## Sensitivity Analysis.
+Perform a sensitivity analysis to evaluate the effect of uncertainties in the process of developing the Decision Tree. In particular consider at least the effect of mistakenly assessing the antidumping tax likelihood.  
+
+### Soluzione.
+Per questa analisi si analizza l'aumento della probabilità della tassazione. Utilizzo le variazioni con probabilità 70%, 80% e 90%. Attraverso il grafico possiamo notare che la soluzione dell'acquisto effettuato interamente attraverso l'azienda italiana è conveniente nel momento in cui la probabilità di tassazione si trova nel punto di intersezione all'interno dell'intervallo 0.8 e 0.9
+
+```{r}
+sensitivity <- data.frame("ProbabilityTax" = c(0.6,0.7,0.8,0.9),
+                          "EV1" = c(1275000,1362000,1450000,1538000),
+                          "EV2" = c(1600000,1658000,1716000,1775000),
+                          "EV3" =c(1500000,1500000,1500000,1500000))
+
+ggplot(sensitivity) +
+  geom_line(aes(x=ProbabilityTax, y=EV1),color= 2, size= 1, alpha= 0.9) +
+  geom_line(aes(x=ProbabilityTax, y=EV2),color= 4, size= 1, alpha= 0.9) +
+  geom_line(aes(x=ProbabilityTax, y=EV3),color= 6, size= 1, alpha= 0.9) +
+  labs( y = "Expected Values" ) +
+  annotate("text", x = 0.7 ,y = 1385000, label = "500.000 KR", size= 3.6, col=2) +
+  annotate("text", x = 0.7 ,y = 1690000, label = "250.000 KR & 250.000 IM", size=3.6, col= 4) +
+  annotate("text", x = 0.7 ,y = 1515000, label = "500.000 IM", size= 3.6, col= 6) +
+  geom_point( x = 0.857 ,y = 1500000, colour = "black", size = 3) +
+  annotate("text", x = 0.857 ,y = 1450000, label = "Intersezione 500 KR - 500 ITA", size=3.6, col="black")
+```
+
+## Utility Function and Certainty Equivalent.
+Assume that all the information in that exercise still holds, and that DM has an exponential utility function with a risk tolerance of $750,000.  
+Determine DM’s preferred ordering alternative using this utility function.  
+
+### Soluzione.
+Si consideri la funzione esponenziale di utilità $u(x)=1-\varepsilon^{x/R}$ in cui $x$ rappresenta il total cost e $R$ rappresenta la risk tolerance che nel nostro caso ci viene indicato essere pari a ${\$750.000}$.  
+Applico quindi la funzione ad ogni ramo così ottenendo:  
+$ut1 = 1-e^{(750000/750000))}=-1,718;$  
+$ut2 = 1-e^{(1125000/750000))}=-3,482;$  
+$ut3 = 1-e^{(1500000/750000))}=-6,389;$  
+$ut4 = 1-e^{(2250000/750000))}=-19,086;$  
+$ut5 = 1-e^{(1250000/750000))}=-4,294;$  
+$ut6 = 1-e^{(1500000/750000))}=-6,389;$  
+$ut7 = 1-e^{(1750000/750000))}=-9,312;$  
+$ut8 = 1-e^{(2250000/750000))}=-19,086;$  
+$ut9 = 1-e^{(1500000/750000))}=-6,389$  
+
+Dopo aver calcolato le utility, prendiamo come esempio l'alternativa dell'ordine interamente effettuato presso l'azienda coreana. Moltiplichiamo le utility delle varie tassazioni per la quota di $\frac{1}{3}$ e otteniamo: $EU=(-3,482*\frac{1}{3})+(-6,389*\frac{1}{3})+(-19,086*\frac{1}{3})=-9,652$.  
+Facciamo la stessa operazione per le probabilità di tassazione e non, così ottenendo: $EU=(-1,718*0.4)+(-9,652*0.6)=-6,478$.  Questi valori ci permettono di calcolare anche la *Certainty Equivalent* attraverso la funzione $CE=R*ln(1-EU)$, valore il quale per la prima alternativa (ordine coreano) risulta pari a: $CE=750.000*ln(1+6,478)=1.509.000$.  
+Applichiamo le stesse operazioni anche per le altre due alternative riportando i risultati direttamente nel seguente decision tree.
+```{r echo=TRUE, fig.cap="Decision Tree con Risk Avversion", out.width = '100%'}
+knitr::include_graphics("/Users/giulia/Unimib/Decision Models/Assignment 4 - Decision Tree/DT_Risk.png")
+```
+
+> In questo caso la soluzione ottimale non risulta più essere la prima alternativa, bensì la terza, ovvero quella di effettuare l'intero ordine presso il produttore italiano.
+
+## KR revises the offer.
+In an effort to attract DM’s order, KR Electronics has revised its offer as follows: At no increase in price, KR will now provide DM with the right to cancel its entire order for a 10% fee after the outcome of the antidumping suit is known. However, KR will not be able to accept any additional orders from DM once the outcome of the suit is known. Thus, for example, if DM has agreed to purchase 250,000 PAL chips from KR at ${\$2,00}$ per chip, DM can cancel the order by paying ${\$50.000}$. This ability to cancel the order is potentially of interest to DM because it knows that IM Chips would be able to supply PAL chips after the outcome of the antidumping suit is known in time for DM to fill the DISCO order.  
+
+However, DM knows that IM will increase the price of its chips if an antidumping tax is imposed. In particular, if a 50% tax is imposed, then IM will increase its chip price by 15%. If a 100% tax is imposed, then IM will increase its chip price by 20%. Finally, if a 200% tax is imposed, then IM will increase its chip price by 25%.
+
+### Soluzione.
+```{r echo=TRUE, fig.cap="Decision Tree con cancellazione ordine", out.width = '100%'}
+knitr::include_graphics("/Users/giulia/Unimib/Decision Models/Assignment 4 - Decision Tree/DT_canc.png")
+```
+(Si indicano i nuovi valori in blu e per comodità si inserisce il costo per il produttore italiano nella colonna amount, quindi se in blu **non** indica l'ammontare della tassa.)  
+
+DM System ora ha l'opportunità di annullare il proprio ordine presso KR Electronics dopo l'esito dell'applicazione o meno della tassazione. Dato che l'ordine presso il produttore italiano comporta un costo pari a ${\$1.500.000}$, per tale operazione di "cambio" ordine andremo a considerare direttamente i casi in cui, nelle prime due alternative, il costo totale supera il costo totale dell'ordine dal produttore italiano. Sarà infatti necessario ricalcolare anche le utility di tali rami e i rispettivi Certainty Equivalent.  
+
+**Prima alternativa** (intero ordine coreano) andiamo a rivalutare quindi il caso della tassazione pari al 200%. La cancellazione dell'ordine sarà pari al 10% dell'ordine di 500.000 unità per il prezzo unitario senza incrementi, quindi: $500.000*1,50=750.000$; **10%:75.000**.  
+Ciò significa che del totale al produttore coreano non si paga una porzione pari a ${\$675.000}$. 
+Il produttore italiano ci impone l'incremento del 25% al prezzo unitario quindi ${\$3,00}\rightarrow$${\$3,75}$ così avendo un costo al produttore italiano pari a: $500.000*3,75=1.875.000$.  Infine, sommiamo il costo di cancellazione e otteniamo un costo totale pari a ${\$1.950.000}$.  
+Avremo una nuova utility pari a **-12,464**, ottenendo **EU=-5,154** e **CE=$1.363.000**.  
+
+**Seconda alternativa** andiamo a rivalutare i casi di tassazione al 100% e al 200%. In questi due casi la cancellazione dell'ordine è pari a ${\$50.000}$.  
+*Primo caso*: incremento prezzo unitario di IM Chips del 20% quindi il costo al produttore italiano è pari a $250.000*3,60=900.000$ a cui sommiamo 750.000 già a loro dovuti e la cancellazione, per avere un costo totale pari a ${\$1.700.000}$.  
+*Secondo caso*: incremento prezzo unitario di IM Chips del 25% quindi il costo al produttore italiano è pari a $250.000*3,75=938.000$ a cui sommiamo 750.000 già a loro dovuti e la cancellazione, per avere un costo totale pari a ${\$1.738.000}$.  
+Le nuove utility saranno rispettivamente **-8,647** e **-9,149**, ottenendo **EU=-6,555** e **CE=$1.517.000**.  
+
+> Questi nuovi valori riportano come soluzione ottimale la prima alternativa.  
+
+## Value of information.
+Assume that all the information presented still holds. Using the expected value as the decision criterion, determine the maximum amount that DM should pay for information about whether the antidumping tax will be imposed. Suppose this information can be obtained prior to making the ordering decision.
+
+### Soluzione.
+Osservando la soluzione ottenuta nel punto dedicato a *Expected Value*, sappiamo che l'alternativa migliore è quella di ordinare le 500.000 unità dal produttore coreano, nonostante vi sia il 60% di probabilità che venga imposta la tassa antidumping. Se dall'informazione perfetta sappiamo che la tassa non verrà imposta, tale alternativa risulta ancora la soluzione ottimale con un expected value di ${\$1.275.000}$.  
+Nel caso in cui invece la fonte d'informazione perfetta predica che la tassa verrà imposta, la soluzione ottimale sarà l'alternativa che concerne l'intero acquisto presso il produttore italiano con un expected value di ${\$1.500.000}$.  
+
+```{r echo=TRUE, out.width = '100%'}
+knitr::include_graphics("/Users/giulia/Unimib/Decision Models/Assignment 4 - Decision Tree/DT_inf.png")
+```
+
+> Abbiamo ora ad albero l'alternativa di expected value così ottenuta: $(750.000*0,4)+(1.500.000*0,6)=1.200.000$ e finché l'expected value della nostra migliore alternativa senza informazione perfetta è ${\$1.275.000}$ allora l'expected value dell'informazione perfetta è pari a ${\$75.000}$.
